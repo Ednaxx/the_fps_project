@@ -1,7 +1,7 @@
 [gd_scene load_steps=13 format=3 uid="uid://b1yleqbb8tc7x"]
 
-[ext_resource type="PackedScene" uid="uid://btv0a42cgxt8g" path="res://environment/WE_test.tscn" id="1_db21n"]
 [ext_resource type="Material" uid="uid://cn1gsy15bkaff" path="res://materials/grid.tres" id="2_x5xie"]
+[ext_resource type="PackedScene" uid="uid://btv0a42cgxt8g" path="res://environment/world_environment_scene.tscn" id="3_ke5g0"]
 [ext_resource type="Texture2D" uid="uid://ivvpsi314b34" path="res://textures/grid.jpg" id="3_yfwkt"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_gd0ev"]
@@ -120,8 +120,6 @@ data = PackedVector3Array(-4, 1, 1, 4, -1, 1, -4, -1, 1, -4, 1, -1, -4, -1, -1, 
 
 [node name="Node3D" type="Node3D"]
 
-[node name="WorldEnvironment" parent="." instance=ExtResource("1_db21n")]
-
 [node name="Floor" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
 mesh = SubResource("BoxMesh_gd0ev")
@@ -140,8 +138,17 @@ mesh = SubResource("BoxMesh_xc4gq")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Box/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_vp4dy")
 
+[node name="Box2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.00898, 1, -6.03461)
+mesh = SubResource("BoxMesh_xc4gq")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Box2"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Box2/StaticBody3D"]
+shape = SubResource("ConcavePolygonShape3D_vp4dy")
+
 [node name="Ramp" type="MeshInstance3D" parent="."]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 5, 0, 0)
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 5, 0.966338, 0)
 mesh = SubResource("PrismMesh_rutao")
 skeleton = NodePath("../Box")
 
@@ -149,3 +156,5 @@ skeleton = NodePath("../Box")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ramp/StaticBody3D"]
 shape = SubResource("ConcavePolygonShape3D_j6kcl")
+
+[node name="WorldEnvironment" parent="." instance=ExtResource("3_ke5g0")]
