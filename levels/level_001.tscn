@@ -74,9 +74,11 @@ void fragment() {
 render_priority = 0
 shader = SubResource("Shader_cwof1")
 shader_parameter/albedo = Color(0.937255, 1, 0, 1)
+shader_parameter/texture_albedo = ExtResource("3_yfwkt")
 shader_parameter/point_size = 1.0
 shader_parameter/roughness = 0.5
-shader_parameter/metallic_texture_channel = null
+shader_parameter/metallic_texture_channel = Vector4(0, 0, 0, 0)
+shader_parameter/texture_roughness = ExtResource("3_yfwkt")
 shader_parameter/specular = 0.5
 shader_parameter/metallic = 0.0
 shader_parameter/uv1_blend_sharpness = 1.0
@@ -84,8 +86,6 @@ shader_parameter/uv1_scale = Vector3(0.5, 0.5, 0.5)
 shader_parameter/uv1_offset = Vector3(0.5, 0.5, 0.5)
 shader_parameter/uv2_scale = Vector3(1, 1, 1)
 shader_parameter/uv2_offset = Vector3(0, 0, 0)
-shader_parameter/texture_albedo = ExtResource("3_yfwkt")
-shader_parameter/texture_roughness = ExtResource("3_yfwkt")
 
 [sub_resource type="BoxMesh" id="BoxMesh_xc4gq"]
 material = SubResource("ShaderMaterial_0racc")
@@ -98,9 +98,11 @@ data = PackedVector3Array(-1, 1, 1, 1, 1, 1, -1, -1, 1, 1, 1, 1, 1, -1, 1, -1, -
 render_priority = 0
 shader = SubResource("Shader_cwof1")
 shader_parameter/albedo = Color(0, 0.67451, 0, 1)
+shader_parameter/texture_albedo = ExtResource("3_yfwkt")
 shader_parameter/point_size = 1.0
 shader_parameter/roughness = 0.5
-shader_parameter/metallic_texture_channel = null
+shader_parameter/metallic_texture_channel = Vector4(0, 0, 0, 0)
+shader_parameter/texture_roughness = ExtResource("3_yfwkt")
 shader_parameter/specular = 0.5
 shader_parameter/metallic = 0.0
 shader_parameter/uv1_blend_sharpness = 1.0
@@ -108,8 +110,6 @@ shader_parameter/uv1_scale = Vector3(0.5, 0.5, 0.5)
 shader_parameter/uv1_offset = Vector3(1, 0.5, 0.5)
 shader_parameter/uv2_scale = Vector3(1, 1, 1)
 shader_parameter/uv2_offset = Vector3(0, 0, 0)
-shader_parameter/texture_albedo = ExtResource("3_yfwkt")
-shader_parameter/texture_roughness = ExtResource("3_yfwkt")
 
 [sub_resource type="PrismMesh" id="PrismMesh_rutao"]
 material = SubResource("ShaderMaterial_62u37")
