@@ -1,8 +1,11 @@
 extends CharacterBody3D
 
 
-@export var DEFAULT_SPEED := 5.0
+@export var WALKING_SPEED := 2.0
+@export var RUNNING_SPEED := 5.0
+@export var SPRINTING_SPEED := 8.0
 @export var CROUCHED_SPEED := 2.0
+
 @export var JUMP_VELOCITY := 4.5
 
 @export var FIRST_PERSON_X_MOUSE_SENSITIVITY := 0.3
@@ -25,10 +28,19 @@ var _is_first_person := true
 @export var CROUCH_SHAPE_CAST: ShapeCast3D
 
 enum MovementState {
+	WALKING,
 	RUNNING,
+	SPRINTING,
 	CROUCHING
 }
+
 var _movement_state := MovementState.RUNNING
+var _movement_speeds = {
+	MovementState.WALKING: WALKING_SPEED,
+	MovementState.RUNNING: RUNNING_SPEED,
+	MovementState.SPRINTING: SPRINTING_SPEED,
+	MovementState.CROUCHING: CROUCHED_SPEED,
+}
 
 var _target_camera_distance: float
 var _mouse_rotation: Vector3
@@ -59,7 +71,12 @@ func _input(event: InputEvent) -> void:
 	elif (Input.is_action_just_pressed("third_person_zoom_out") and !_is_first_person):
 		_target_camera_distance = clamp(_target_camera_distance + 1.0, CAMERA_ZOOM_IN_LIMIT, CAMERA_ZOOM_OUT_LIMIT)
 	elif event.is_action_pressed("crouch") and is_on_floor():
-		_on_crouch_pressed()
+		_crouch()
+	elif event.is_action_pressed("sprint") and is_on_floor():
+		_sprint()
+	elif event.is_action_pressed("walk") and is_on_floor():
+		if _movement_state != MovementState.CROUCHING:
+			_walk()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if (event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED):
@@ -82,12 +99,13 @@ func _physics_process(delta: float) -> void:
 
 func handle_movement(input_direction: Vector2) -> void:
 	var direction := (transform.basis * Vector3(input_direction.x, 0, input_direction.y)).normalized()
+	var speed = _movement_speeds[_movement_state]
 	if direction:
-		velocity.x = direction.x * DEFAULT_SPEED if _movement_state == MovementState.RUNNING else direction.x * CROUCHED_SPEED
-		velocity.z = direction.z * DEFAULT_SPEED if _movement_state == MovementState.RUNNING else direction.z * CROUCHED_SPEED
+		velocity.x = direction.x * speed
+		velocity.z = direction.z * speed
 	else:
-		velocity.x = move_toward(velocity.x, 0, DEFAULT_SPEED if _movement_state == MovementState.RUNNING else CROUCHED_SPEED)
-		velocity.z = move_toward(velocity.z, 0, DEFAULT_SPEED if _movement_state == MovementState.RUNNING else CROUCHED_SPEED)
+		velocity.x = move_toward(velocity.x, 0, speed)
+		velocity.z = move_toward(velocity.z, 0, speed)
 
 func toggle_camera() -> void:
 	_is_first_person = !_is_first_person
@@ -136,12 +154,22 @@ func update_camera(delta: float) -> void:
 	_rotation_input = 0
 	_tilt_input = 0
 
-func _on_crouch_pressed() -> void:
+func _crouch() -> void:
 	if _movement_state == MovementState.CROUCHING and !CROUCH_SHAPE_CAST.is_colliding():
 		CROUCH_ANIMATION_PLAYER.play_backwards("crouch")
+		_movement_state = MovementState.RUNNING
 	elif _movement_state != MovementState.CROUCHING:	
 		CROUCH_ANIMATION_PLAYER.play("crouch")
+		_movement_state = MovementState.CROUCHING
 
-func _on_crouch_animation_player_animation_finished(anim_name: StringName) -> void:
-	if anim_name == "crouch":
-		_movement_state = MovementState.CROUCHING if _movement_state == MovementState.RUNNING else MovementState.RUNNING
+func _sprint() -> void:
+	if _movement_state == MovementState.CROUCHING:
+		_crouch()
+	elif _movement_state == MovementState.SPRINTING:
+		_movement_state = MovementState.RUNNING
+		return
+	_movement_state = MovementState.SPRINTING
+	
+func _walk() -> void:
+	_movement_state = MovementState.WALKING if _movement_state != MovementState.WALKING else MovementState.RUNNING
+
