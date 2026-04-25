@@ -1,7 +1,8 @@
 extends CharacterBody3D
 
 
-@export var SPEED := 5.0
+@export var DEFAULT_SPEED := 5.0
+@export var CROUCHED_SPEED := 2.0
 @export var JUMP_VELOCITY := 4.5
 
 @export var FIRST_PERSON_X_MOUSE_SENSITIVITY := 0.3
@@ -18,7 +19,16 @@ extends CharacterBody3D
 
 @export var CAMERA_PIVOT: Node3D
 @export var CAMERA_ARM: SpringArm3D
-var is_first_person := true
+var _is_first_person := true
+
+@export var CROUCH_ANIMATION_PLAYER: AnimationPlayer
+@export var CROUCH_SHAPE_CAST: ShapeCast3D
+
+enum MovementState {
+	RUNNING,
+	CROUCHING
+}
+var _movement_state := MovementState.RUNNING
 
 var _target_camera_distance: float
 var _mouse_rotation: Vector3
@@ -35,15 +45,21 @@ func _ready() -> void:
 	$CameraPivot/FirstPersonCamera.make_current()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
+	CROUCH_ANIMATION_PLAYER = $CrouchAnimationPlayer
+	CROUCH_SHAPE_CAST = $CrouchShapeCast3D
+	CROUCH_SHAPE_CAST.add_exception(self)
+
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("exit"):
 		get_tree().quit()
 	elif event.is_action_pressed("toggle_camera"):
 		toggle_camera()
-	elif (Input.is_action_just_pressed("third_person_zoom_in") and !is_first_person):
+	elif (Input.is_action_just_pressed("third_person_zoom_in") and !_is_first_person):
 		_target_camera_distance = clamp(_target_camera_distance - 1.0, CAMERA_ZOOM_IN_LIMIT, CAMERA_ZOOM_OUT_LIMIT)
-	elif (Input.is_action_just_pressed("third_person_zoom_out") and !is_first_person):
+	elif (Input.is_action_just_pressed("third_person_zoom_out") and !_is_first_person):
 		_target_camera_distance = clamp(_target_camera_distance + 1.0, CAMERA_ZOOM_IN_LIMIT, CAMERA_ZOOM_OUT_LIMIT)
+	elif event.is_action_pressed("crouch") and is_on_floor():
+		_on_crouch_pressed()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if (event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED):
@@ -55,7 +71,7 @@ func _physics_process(delta: float) -> void:
 
 	update_camera(delta)
 
-	if Input.is_action_just_pressed("jump") and is_on_floor():
+	if Input.is_action_just_pressed("jump") and is_on_floor() and _movement_state != MovementState.CROUCHING and !CROUCH_ANIMATION_PLAYER.is_playing():
 		velocity.y = JUMP_VELOCITY
 	
 	var input_direction := Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
@@ -67,15 +83,15 @@ func _physics_process(delta: float) -> void:
 func handle_movement(input_direction: Vector2) -> void:
 	var direction := (transform.basis * Vector3(input_direction.x, 0, input_direction.y)).normalized()
 	if direction:
-		velocity.x = direction.x * SPEED
-		velocity.z = direction.z * SPEED
+		velocity.x = direction.x * DEFAULT_SPEED if _movement_state == MovementState.RUNNING else direction.x * CROUCHED_SPEED
+		velocity.z = direction.z * DEFAULT_SPEED if _movement_state == MovementState.RUNNING else direction.z * CROUCHED_SPEED
 	else:
-		velocity.x = move_toward(velocity.x, 0, SPEED)
-		velocity.z = move_toward(velocity.z, 0, SPEED)
+		velocity.x = move_toward(velocity.x, 0, DEFAULT_SPEED if _movement_state == MovementState.RUNNING else CROUCHED_SPEED)
+		velocity.z = move_toward(velocity.z, 0, DEFAULT_SPEED if _movement_state == MovementState.RUNNING else CROUCHED_SPEED)
 
 func toggle_camera() -> void:
-	is_first_person = !is_first_person
-	if is_first_person:
+	_is_first_person = !_is_first_person
+	if _is_first_person:
 		$CameraPivot/FirstPersonCamera.make_current()
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	else:
@@ -85,7 +101,7 @@ func toggle_camera() -> void:
 		CAMERA_PIVOT.rotation_degrees.z = 0.0
 
 func handle_mouse_motion(event: InputEventMouseMotion) -> void:
-	if is_first_person:
+	if _is_first_person:
 		_rotation_input = event.relative.x * FIRST_PERSON_X_MOUSE_SENSITIVITY
 		_tilt_input = -event.relative.y * FIRST_PERSON_Y_MOUSE_SENSITIVITY
 	else:
@@ -93,12 +109,12 @@ func handle_mouse_motion(event: InputEventMouseMotion) -> void:
 		_tilt_input = -event.relative.y * THIRD_PERSON_Y_MOUSE_SENSITIVITY
 
 func update_camera(delta: float) -> void:
-	if !is_first_person:
+	if !_is_first_person:
 		CAMERA_ARM.spring_length = lerp(CAMERA_ARM.spring_length, _target_camera_distance, CAMERA_ZOOM_SPEED * delta)
 
 	_mouse_rotation.x += _tilt_input * delta
 
-	if is_first_person:
+	if _is_first_person:
 		_mouse_rotation.x = clamp(_mouse_rotation.x, -FIRST_PERSON_TILT_LIMIT, FIRST_PERSON_TILT_LIMIT)
 	else:
 		_mouse_rotation.x = clamp(_mouse_rotation.x, -THIRD_PERSON_TILT_LIMIT, THIRD_PERSON_TILT_LIMIT)
@@ -108,7 +124,7 @@ func update_camera(delta: float) -> void:
 	_player_rotation = Vector3(0, _mouse_rotation.y, 0)
 	_camera_rotation = Vector3(_mouse_rotation.x, 0, 0)
 
-	if is_first_person:
+	if _is_first_person:
 		CAMERA_PIVOT.transform.basis = Basis.from_euler(_camera_rotation)
 		CAMERA_PIVOT.rotation.z = 0.0
 	else:
@@ -119,3 +135,13 @@ func update_camera(delta: float) -> void:
 
 	_rotation_input = 0
 	_tilt_input = 0
+
+func _on_crouch_pressed() -> void:
+	if _movement_state == MovementState.CROUCHING and !CROUCH_SHAPE_CAST.is_colliding():
+		CROUCH_ANIMATION_PLAYER.play_backwards("crouch")
+	elif _movement_state != MovementState.CROUCHING:	
+		CROUCH_ANIMATION_PLAYER.play("crouch")
+
+func _on_crouch_animation_player_animation_finished(anim_name: StringName) -> void:
+	if anim_name == "crouch":
+		_movement_state = MovementState.CROUCHING if _movement_state == MovementState.RUNNING else MovementState.RUNNING

@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://b1yleqbb8tc7x"]
+[gd_scene format=3 uid="uid://b1yleqbb8tc7x"]
 
 [ext_resource type="PackedScene" uid="uid://cllcqvhnkolgh" path="res://controllers/player_controller.tscn" id="1_xe12c"]
 [ext_resource type="Material" uid="uid://cn1gsy15bkaff" path="res://materials/grid.tres" id="2_x5xie"]
@@ -119,45 +119,54 @@ size = Vector3(8, 2, 2)
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_j6kcl"]
 data = PackedVector3Array(-4, 1, 1, 4, -1, 1, -4, -1, 1, -4, 1, -1, -4, -1, -1, 4, -1, -1, -4, 1, 1, -4, 1, -1, 4, -1, 1, -4, 1, -1, 4, -1, -1, 4, -1, 1, -4, 1, -1, -4, 1, 1, -4, -1, -1, -4, 1, 1, -4, -1, 1, -4, -1, -1, -4, -1, 1, 4, -1, 1, -4, -1, -1, 4, -1, 1, 4, -1, -1, -4, -1, -1)
 
-[node name="Node3D" type="Node3D"]
+[node name="Node3D" type="Node3D" unique_id=2018677035]
 
-[node name="CharacterBody3D" parent="." instance=ExtResource("1_xe12c")]
+[node name="CharacterBody3D" parent="." unique_id=1891924513 instance=ExtResource("1_xe12c")]
 
-[node name="Floor" type="MeshInstance3D" parent="."]
+[node name="Floor" type="MeshInstance3D" parent="." unique_id=374676184]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
 mesh = SubResource("BoxMesh_gd0ev")
 
-[node name="StaticBody3D" type="StaticBody3D" parent="Floor"]
+[node name="StaticBody3D" type="StaticBody3D" parent="Floor" unique_id=1131431472]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/StaticBody3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor/StaticBody3D" unique_id=1104034075]
 shape = SubResource("ConcavePolygonShape3D_oahyi")
 
-[node name="Box" type="MeshInstance3D" parent="."]
+[node name="Box" type="MeshInstance3D" parent="." unique_id=55884251]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1, -5)
 mesh = SubResource("BoxMesh_xc4gq")
 
-[node name="StaticBody3D" type="StaticBody3D" parent="Box"]
+[node name="StaticBody3D" type="StaticBody3D" parent="Box" unique_id=1860932971]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Box/StaticBody3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Box/StaticBody3D" unique_id=1858261774]
 shape = SubResource("ConcavePolygonShape3D_vp4dy")
 
-[node name="Box2" type="MeshInstance3D" parent="."]
+[node name="FlyingThingie" type="MeshInstance3D" parent="Box" unique_id=1965696777]
+transform = Transform3D(3, 0, 0, 0, 0.5, 0, 0, 0, 3, -6.053, 0.75, 0.424)
+mesh = SubResource("BoxMesh_xc4gq")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Box/FlyingThingie" unique_id=120767346]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Box/FlyingThingie/StaticBody3D" unique_id=581719002]
+shape = SubResource("ConcavePolygonShape3D_vp4dy")
+
+[node name="Box2" type="MeshInstance3D" parent="." unique_id=2079729543]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.00898, 1, -6.03461)
 mesh = SubResource("BoxMesh_xc4gq")
 
-[node name="StaticBody3D" type="StaticBody3D" parent="Box2"]
+[node name="StaticBody3D" type="StaticBody3D" parent="Box2" unique_id=192071767]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Box2/StaticBody3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Box2/StaticBody3D" unique_id=1771648921]
 shape = SubResource("ConcavePolygonShape3D_vp4dy")
 
-[node name="Ramp" type="MeshInstance3D" parent="."]
+[node name="Ramp" type="MeshInstance3D" parent="." unique_id=1773220630]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 5, 0.966338, 0)
 mesh = SubResource("PrismMesh_rutao")
 skeleton = NodePath("../Box")
 
-[node name="StaticBody3D" type="StaticBody3D" parent="Ramp"]
+[node name="StaticBody3D" type="StaticBody3D" parent="Ramp" unique_id=1383449415]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ramp/StaticBody3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ramp/StaticBody3D" unique_id=1194426328]
 shape = SubResource("ConcavePolygonShape3D_j6kcl")
 
-[node name="WorldEnvironment" parent="." instance=ExtResource("3_ke5g0")]
+[node name="WorldEnvironment" parent="." unique_id=1209156524 instance=ExtResource("3_ke5g0")]
